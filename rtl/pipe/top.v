@@ -37,8 +37,8 @@ module top (
     wire [31:0] IF_instruction;
     reg [31:0] IF_pc;
 
-    assign addra = rst_n ? IF_pc : 0;
-    assign IF_instruction = rst_n ? doa : 0;
+    assign addra = IF_pc;
+    assign IF_instruction = doa;
 
     // =============================== INSTRUCTION DECODE ===============================
 
@@ -275,7 +275,7 @@ module top (
         .rs1_data(EX_rs1_data),
         .next_pc(next_pc)
     );
-
+            
 
     // =============================== REGFILE WRITE BACK ===============================
 
