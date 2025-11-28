@@ -17,15 +17,10 @@ module ForwardUnit (
     assign rs1_WB_fwd = (EX_rs1 == WB_rd) && (EX_ValidReg[1] && WB_ValidReg[0]);
     assign rs2_WB_fwd = (EX_rs2 == WB_rd) && (EX_ValidReg[2] && WB_ValidReg[0]);
 
-    assign rs1_fwd = (rs1_MEM_fwd || rs1_WB_fwd);
-    assign rs2_fwd = (rs2_MEM_fwd || rs2_WB_fwd);
+    assign rs1_fwd = (rs1_MEM_fwd || rs1_WB_fwd) && (EX_rs1 != 0);
+    assign rs2_fwd = (rs2_MEM_fwd || rs2_WB_fwd) && (EX_rs2 != 0);
 
     always @ (*) begin
-
-        if (rs1_MEM_fwd) rs1_fwd_data = MEM_rd_write_data;
-        if (rs2_MEM_fwd) rs2_fwd_data = MEM_rd_write_data;
-        if (rs1_WB_fwd) rs1_fwd_data = WB_rd_write_data;
-        if (rs2_WB_fwd) rs2_fwd_data = WB_rd_write_data;
 
         case (MEM_RegSrc)
 
@@ -35,6 +30,12 @@ module ForwardUnit (
 
         endcase
 
+        if (rs1_MEM_fwd) rs1_fwd_data = MEM_rd_write_data;
+        if (rs2_MEM_fwd) rs2_fwd_data = MEM_rd_write_data;
+        if (rs1_WB_fwd) rs1_fwd_data = WB_rd_write_data;
+        if (rs2_WB_fwd) rs2_fwd_data = WB_rd_write_data;
+
+        
     end
 
 

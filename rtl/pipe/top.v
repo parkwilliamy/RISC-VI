@@ -190,9 +190,8 @@ module top (
 
     assign addrb = EX_ALU_result;
 
-    LSU INST8 (
+    Store INST8 (
         .MemWrite(EX_MemWrite),
-        .MemRead(EX_MemRead),
         .addrb(EX_ALU_result),
         .rs2_data(EX_rs2_data),
         .funct3(EX_funct3),
@@ -212,12 +211,6 @@ module top (
     wire [31:0] MEM_ALU_result;
     wire [4:0] MEM_rd;
 
-    wire [1:0] byte_offset;
-    assign byte_offset = MEM_ALU_result % 4;
-
-    wire [31:0] DMEM_shifted_word; // for loads
-    assign DMEM_shifted_word = dob >> 8*byte_offset;
-
     reg [31:0] MEM_DMEM_result; // properly formatted data for load instructions
 
     assign {
@@ -230,6 +223,13 @@ module top (
         MEM_ALU_result,
         MEM_rd
     } = EX_MEM;
+
+    Load INST9 (
+        .addrb(MEM_ALU_result),
+        .funct3(MEM_funct3),
+        .DMEM_word(dob),
+        .DMEM_result(MEM_DMEM_result)
+    );
 
 
     // =============================== REGFILE WRITE BACK ===============================
@@ -339,23 +339,6 @@ module top (
         .next_pc(next_pc)
     );
 
-
-    // ================================== MEMORY WRITE ==================================
-
-    always @ (*) begin
-
-        case (MEM_funct3) 
-        
-            3'b000: MEM_DMEM_result = {{24{DMEM_shifted_word[7]}}, DMEM_shifted_word[7:0]}; // LB
-            3'b001: MEM_DMEM_result = {{16{DMEM_shifted_word[15]}}, DMEM_shifted_word[15:0]}; // LH
-            3'b010: MEM_DMEM_result = DMEM_shifted_word; // LW
-            3'b100: MEM_DMEM_result = {24'b0, DMEM_shifted_word[7:0]}; // LBU
-            3'b101: MEM_DMEM_result = {16'b0, DMEM_shifted_word[15:0]}; // LHU
-
-        endcase
-
-    end
-            
 
     // =============================== REGFILE WRITE BACK ===============================
 

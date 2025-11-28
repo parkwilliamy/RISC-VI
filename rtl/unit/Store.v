@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
-module LSU (
-    input MemWrite, MemRead,
+module Store (
+    input MemWrite,
     input [31:0] addrb, rs2_data,
     input [2:0] funct3,
     output reg [3:0] web,
