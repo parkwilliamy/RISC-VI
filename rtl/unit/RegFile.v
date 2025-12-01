@@ -9,8 +9,8 @@ module RegFile (
 
     reg [31:0] reg_file [31:0];
 
-    assign rs1_data = (RegWrite && rd == rs1) ? rd_write_data : reg_file[rs1];
-    assign rs2_data = (RegWrite && rd == rs2) ? rd_write_data : reg_file[rs2];
+    assign rs1_data = (RegWrite && rd == rs1 && rs1 != 0) ? rd_write_data : reg_file[rs1];
+    assign rs2_data = (RegWrite && rd == rs2 && rs2 != 0) ? rd_write_data : reg_file[rs2];
 
     integer i;
 
