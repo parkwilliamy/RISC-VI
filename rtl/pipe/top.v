@@ -114,7 +114,7 @@ module top (
     wire [7:0] ID_BHTaddr;
     assign ID_BHTaddr = ID_pc[9:2];
 
-    wire ID_branch_prediction;
+    wire [1:0] ID_branch_prediction;
     assign ID_branch_prediction = BHT[ID_BHTaddr];
     
 
@@ -177,8 +177,8 @@ module top (
     wire [1:0] EX_prediction_status;
 
     BRU INST7 (
-        .branch_prediction(EX_branch_prediction),
-        .Branch(EX_Branch), 
+        .EX_branch_prediction(EX_branch_prediction),
+        .EX_Branch(EX_Branch), 
         .zero(EX_zero), 
         .sign(EX_sign), 
         .overflow(EX_overflow), 
@@ -263,11 +263,13 @@ module top (
         .ID_branch_prediction(ID_branch_prediction),
         .prediction_status(EX_prediction_status),
         .ID_Branch(ID_Branch),
+        .EX_Branch(EX_Branch),
         .ID_Jump(ID_Jump),
         .EX_Jump(EX_Jump),
         .ID_ALUSrc(ID_ALUSrc),
         .EX_ALUSrc(EX_ALUSrc),
-        .pc(IF_pc),
+        .IF_pc(IF_pc),
+        .EX_pc(EX_pc),
         .ID_pc_imm(ID_pc_imm),
         .EX_pc_imm(EX_pc_imm),
         .rs1_imm(EX_rs1_imm),
@@ -336,7 +338,7 @@ module top (
             EX_MEM <= 0;
             MEM_WB <= 0;
 
-            for (i = 0; i < 255; i = i+1) begin
+            for (i = 0; i < 256; i = i+1) begin
 
                 BHT[i] <= 2'b01;
 
@@ -359,7 +361,7 @@ module top (
 
                 end
                 else IF_ID <= IF_pc;
-                if (EX_Flush) ID_EX <= 195'b0;
+                if (EX_Flush) ID_EX <= 205'b0;
                 else ID_EX <= {ID_pc, ID_pc_imm, ID_BHTaddr, ID_funct3, ID_field, ID_ValidReg, ID_ALUOp, ID_RegSrc, ID_ALUSrc, ID_RegWrite, ID_MemRead, ID_MemWrite, ID_Branch, ID_branch_prediction, ID_Jump, ID_rs1_data, ID_rs2_data, ID_imm, ID_rd, ID_rs1, ID_rs2};
 
                 EX_MEM <= {EX_pc, EX_pc_imm, EX_funct3, EX_ValidReg, EX_RegSrc, EX_RegWrite, EX_MemRead, EX_MemWrite, EX_ALU_result, EX_rs2_data_final, EX_rs2, EX_rd};
@@ -386,12 +388,18 @@ module top (
 
             end
 
-            case (EX_prediction_status)
+            if (EX_Branch) begin
 
-                0: BHT[EX_BHTaddr] <= BHT[EX_BHTaddr]+1;
-                1: BHT[EX_BHTaddr] <= BHT[EX_BHTaddr]-1;
+                case (EX_prediction_status)
 
-            endcase
+                    0: BHT[EX_BHTaddr] <= BHT[EX_BHTaddr]+1;
+                    1: BHT[EX_BHTaddr] <= BHT[EX_BHTaddr]-1;
+                    2: if (BHT[EX_BHTaddr] > 0)  BHT[EX_BHTaddr] <= BHT[EX_BHTaddr]-1;
+                    3: if (BHT[EX_BHTaddr] < 3 && EX_branch_prediction > 1)  BHT[EX_BHTaddr] <= BHT[EX_BHTaddr]+1;
+
+                endcase
+
+            end
 
         end
 

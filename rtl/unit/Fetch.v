@@ -2,19 +2,17 @@
 
 module Fetch(
     input [1:0] ID_branch_prediction, prediction_status, 
-    input ID_Branch, ID_Jump, EX_Jump, ID_ALUSrc, EX_ALUSrc,
-    input [31:0] pc, ID_pc_imm, EX_pc_imm, rs1_imm,
+    input ID_Branch, EX_Branch, ID_Jump, EX_Jump, ID_ALUSrc, EX_ALUSrc,
+    input [31:0] IF_pc, EX_pc, ID_pc_imm, EX_pc_imm, rs1_imm,
     output reg [31:0] next_pc,
     output reg ID_Flush, EX_Flush
 );
-
-    wire [31:0] pc_4;
-    assign pc_4 = pc+4;
 
     always @ (*) begin
 
         ID_Flush = 0;
         EX_Flush = 0;
+        next_pc = IF_pc+4;
 
         if (ID_Branch) begin
 
@@ -34,8 +32,6 @@ module Fetch(
             next_pc = ID_pc_imm; // JAL
 
         end
-
-        else next_pc = pc_4;
 
         if (EX_Branch) begin
 
@@ -67,8 +63,6 @@ module Fetch(
             next_pc = rs1_imm & 32'hFFFFFFFE; // JALR, clear lsb to ensure word alignment
             
         end
-
-        else next_pc = pc_4;
 
     end
 
