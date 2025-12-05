@@ -8,8 +8,9 @@ module BRU (
     output reg [1:0] prediction_status // 0 is predict not taken, taken - 1 is predict taken, not taken - 2 is predict not taken, not taken - 3 is predict taken, taken
 );
 
-    assign branch_taken = branch_taken_inter;
     reg branch_taken_inter;
+    assign branch_taken = branch_taken_inter;
+    
 
     always @(*) begin
 

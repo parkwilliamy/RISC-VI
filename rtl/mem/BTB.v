@@ -3,7 +3,7 @@
 module BTB (
     input clk, rst_n, write,
     input [12:0] pc,
-    input [31:0] pc_imm_in
+    input [31:0] pc_imm_in,
     output reg [31:0] pc_imm_out,
     output hit
 );
@@ -13,9 +13,9 @@ module BTB (
                 LINES_PER_SET = 2, 
                 TAG_WIDTH = 9, 
                 SET_ID_WIDTH = 4,
-                LINE_WIDTH = 43
+                LINE_WIDTH = 43;
 
-    reg [LINE_WIDTH-1:0] branch_target_buffer [NUM_OF_LINES-1:0] // width = tag_bits + pc_imm + valid bit + FIFO bit
+    reg [LINE_WIDTH-1:0] branch_target_buffer [NUM_OF_LINES-1:0]; // width = tag_bits + pc_imm + valid bit + FIFO bit
 
     wire [TAG_WIDTH-1:0] tag;
     wire [SET_ID_WIDTH-1:0] set_id;
@@ -46,7 +46,7 @@ module BTB (
     wire set_full;
     assign set_full = valid1 && valid2;
 
-    assign hit = (tag1 == tag && valid1) || (tag2 == tag && valid2);
+    assign hit = !write && ((tag1 == tag && valid1) || (tag2 == tag && valid2));
 
     // BTB reads
 
@@ -81,21 +81,15 @@ module BTB (
                 // if data is invalid (ie after a reset) or set is full and current line was the first to come in
                 if (!valid1 || set_full && fifo1) begin
 
-                    if (!valid1) branch_target_buffer[line_id1][1] <= 1;
-                    
-                    branch_target_buffer[line_id1][0] <= 0;
                     branch_target_buffer[line_id2][0] <= 1;
-                    pc_imm1 <= pc_imm_in; 
+                    branch_target_buffer[line_id1] <= {tag, pc_imm_in, 1'b1, 1'b0}; 
 
                 end
 
-                if (!valid2 || set_full && fifo2) begin
+                else if (!valid2 || set_full && fifo2) begin
 
-                    if (!valid2) branch_target_buffer[line_id2][1] <= 1;
-                    
                     branch_target_buffer[line_id1][0] <= 1;
-                    branch_target_buffer[line_id2][0] <= 0;
-                    pc_imm1 <= pc_imm_in; 
+                    branch_target_buffer[line_id2] <= {tag, pc_imm_in, 1'b1, 1'b0}; 
 
                 end
 

@@ -76,8 +76,7 @@ module BTB_tb;
             for (i=0; i < 16; i = i+1) begin
 
                 BTBTest.randomize();
-                pc = i+1;
-                pc[3:0] = i[3:0]; // ensure each set is written only once
+                pc = {i[3:0], i[3:0], i[3], i[3:0]};
                 pc_imm_in = BTBTest.pc_imm_in;
                 #10;
 
@@ -87,8 +86,8 @@ module BTB_tb;
 
             for (i=0; i < 16; i = i+1) begin
 
-                assert(DUT.branch_target_buffer[2*i][1] == 1 && DUT.branch_target_buffer[2*i][0] == 1);
-                assert(DUT.branch_target_buffer[2*i+1][1] == 0 && DUT.branch_target_buffer[2*i+1][0] == 0);
+                assert(DUT.branch_target_buffer[2*i][1] == 1 && DUT.branch_target_buffer[2*i][0] == 0);
+                assert(DUT.branch_target_buffer[2*i+1][1] == 0 && DUT.branch_target_buffer[2*i+1][0] == 1);
 
             end
             
@@ -100,21 +99,22 @@ module BTB_tb;
 
         $display("Full Cache Tests");
 
+        rst_n = 0;
         write = 1;
+        #20;
+        rst_n = 1;
 
         repeat (5) begin
 
             for (i=0; i < 16; i = i+1) begin
 
                 BTBTest.randomize();
-                pc = BTBTEst.pc;
-                pc[3:0] = i[3:0]; 
+                pc = {BTBTest.pc[12:4], i[3:0]};
                 pc_imm_in = BTBTest.pc_imm_in;
                 #10;
 
                 BTBTest.randomize();
-                pc = BTBTEst.pc;
-                pc[3:0] = i[3:0]; 
+                pc = {BTBTest.pc[12:4], i[3:0]};
                 pc_imm_in = BTBTest.pc_imm_in;
                 #10;
 
@@ -179,8 +179,7 @@ module BTB_tb;
         for (i=0; i < 16; i = i+1) begin
 
             BTBTest.randomize();
-            pc[12:4] = {i[3:0], i[3:0], i[3]};
-            pc[3:0] = i[3:0]; 
+            pc = {i[3:0], i[3:0], i[3], i[3:0]};
             pc_imm_in = BTBTest.pc_imm_in;
             #10;
 
@@ -208,7 +207,7 @@ module BTB_tb;
         #5;
         assert(hit == 0);
 
-        pc = 273;
+        pc = 545;
         #5;
         assert(hit == 1);
 
@@ -217,7 +216,7 @@ module BTB_tb;
         #5;
         assert(hit == 0);
 
-        pc = 443;
+        pc = 6011;
         #5;
         assert(hit == 1);
 
