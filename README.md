@@ -1,7 +1,7 @@
-# DeltaRV
+# RV100
 
-- DeltaRV is 32-bit processor based on the RISC-V architecture
-- The goal is to implement DeltaRV on the Xilinx Artix-7 FPGA
+- RV100 is 32-bit processor based on the RISC-V architecture
+- The goal is to implement RV100 on the Xilinx Artix-7 FPGA
 - Optimizing performance through pipelining, hazard detection, and branch prediction
 
 # Verification Outline
